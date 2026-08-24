@@ -1,0 +1,32 @@
+# Environment / secrets
+.env
+*.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases / runtime data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+/data/
+/seed/
+/backups/*
+!/backups/.gitkeep
+
+# Runtime artifacts
+*-cookies.txt
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
