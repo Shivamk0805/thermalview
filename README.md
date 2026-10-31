@@ -111,7 +111,9 @@ Grafana, GitHub Actions.
 
 ## Team
 
-B.Tech final-year project, Department of Computer Engineering, Vishwakarma Institute of Information Technology, Pune.
+Industry project at **Jio Platforms Limited**, also submitted as our B.Tech final-year project
+(Department of Computer Engineering, Vishwakarma Institute of Information Technology, Pune).
+The public version uses open M100 telemetry only; no Jio data or infrastructure details are included.
 
 - Shivam Koli
 - Jayendrasing Girase
