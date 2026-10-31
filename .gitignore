@@ -1,32 +1,34 @@
-# Environment / secrets
-.env
-*.env
-
 # Python
+__pycache__/
+*.pyc
 .venv/
 venv/
-__pycache__/
-*.py[cod]
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
 
-# Local databases / runtime data
-*.db
-*.db-*
-*.sqlite
-*.sqlite3
-/data/
-/seed/
-/backups/*
-!/backups/.gitkeep
+# Secrets and local accounts
+.env
+data/users.json
 
-# Runtime artifacts
-*-cookies.txt
+# Data and trained models (download / regenerate; never commit)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/
+data/processed_jan/
+data/*.db
+data/db/
+artifacts/*
+!artifacts/.gitkeep
+artifacts_jan/
+results_jan/
+results_archive/
+results/forecast_predictions_sample.csv
+
+# Unpublished paper material
+docs/paper/
+docs/PAPER_GUIDE.md
+docs/VIVA.md
+*.docx
+
+# Local logs
+*_log.txt
 *.log
-
-# IDE / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db

@@ -1,0 +1,12 @@
+# Python 3.11 or newer
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+scipy>=1.11
+matplotlib>=3.8
+joblib>=1.3
+pyarrow>=14        # reads the M100 Parquet files
+starlette>=0.37
+uvicorn>=0.29
+pytest>=8
+httpx>=0.27        # only for the web API tests (starlette TestClient)

@@ -1,0 +1,37 @@
+setting,value,threshold_c,policy,label,metric,mean,std,n_seeds,diff_vs_coolest_now,diff_ci_low,diff_ci_high,wilcoxon_p
+limit_percentile,85.0,68.5,coolest_now,Coolest now (reactive),caused_violation_pct,3.300709219858156,1.312544155838105,10,,,,
+limit_percentile,85.0,68.5,coolest_now,Coolest now (reactive),caused_excess_degree_min,4861.367443821016,2118.0015202457994,10,,,,
+limit_percentile,85.0,68.5,coolest_now,Coolest now (reactive),rejected,0.0,0.0,10,,,,
+limit_percentile,85.0,68.5,predictive_persist,"Predictive, persistence (ablation)",caused_violation_pct,2.784751773049645,1.0238727427061154,10,-0.5159574468085106,-0.7803245802329792,-0.25159031338404203,0.00390625
+limit_percentile,85.0,68.5,predictive_persist,"Predictive, persistence (ablation)",caused_excess_degree_min,4313.533844200941,1888.7172517724828,10,-547.8335996200765,-1071.594204430155,-24.072994809998022,0.048828125
+limit_percentile,85.0,68.5,predictive_persist,"Predictive, persistence (ablation)",rejected,0.0,0.0,10,0.0,,,
+limit_percentile,85.0,68.5,thermalview,ThermalView (ML + heat model),caused_violation_pct,2.6280141843971636,1.236117801179923,10,-0.6726950354609927,-1.041957108506113,-0.30343296241587253,0.013671875
+limit_percentile,85.0,68.5,thermalview,ThermalView (ML + heat model),caused_excess_degree_min,3874.4272099211857,2046.9840623781165,10,-986.9402338998309,-1558.1146387285787,-415.7658290710831,0.009765625
+limit_percentile,85.0,68.5,thermalview,ThermalView (ML + heat model),rejected,0.0,0.0,10,0.0,,,
+limit_percentile,90.0,69.5,coolest_now,Coolest now (reactive),caused_violation_pct,2.762765957446809,1.0921863645914416,10,,,,
+limit_percentile,90.0,69.5,coolest_now,Coolest now (reactive),caused_excess_degree_min,4013.016249488877,1799.2842262987483,10,,,,
+limit_percentile,90.0,69.5,coolest_now,Coolest now (reactive),rejected,0.0,0.0,10,,,,
+limit_percentile,90.0,69.5,predictive_persist,"Predictive, persistence (ablation)",caused_violation_pct,2.5074468085106383,0.9327543677224376,10,-0.25531914893617036,-0.4717071996910928,-0.0389310981812479,0.01953125
+limit_percentile,90.0,69.5,predictive_persist,"Predictive, persistence (ablation)",caused_excess_degree_min,3570.4799278302926,1626.9930046466795,10,-442.5363216585847,-952.2663686272128,67.19372531004348,0.130859375
+limit_percentile,90.0,69.5,predictive_persist,"Predictive, persistence (ablation)",rejected,0.0,0.0,10,0.0,,,
+limit_percentile,90.0,69.5,thermalview,ThermalView (ML + heat model),caused_violation_pct,2.352482269503546,1.1658192950964796,10,-0.4102836879432624,-0.7224535260779705,-0.09811384980855425,0.037109375
+limit_percentile,90.0,69.5,thermalview,ThermalView (ML + heat model),caused_excess_degree_min,3172.9958160720894,1724.3319947989662,10,-840.0204334167878,-1385.5039335934302,-294.53693324014523,0.009765625
+limit_percentile,90.0,69.5,thermalview,ThermalView (ML + heat model),rejected,0.0,0.0,10,0.0,,,
+limit_percentile,95.0,70.5,coolest_now,Coolest now (reactive),caused_violation_pct,2.428723404255319,0.9097393156578422,10,,,,
+limit_percentile,95.0,70.5,coolest_now,Coolest now (reactive),caused_excess_degree_min,3285.6653646875448,1530.9608882497207,10,,,,
+limit_percentile,95.0,70.5,coolest_now,Coolest now (reactive),rejected,0.0,0.0,10,,,,
+limit_percentile,95.0,70.5,predictive_persist,"Predictive, persistence (ablation)",caused_violation_pct,2.292198581560284,0.8664652526806325,10,-0.13652482269503552,-0.3436243810135785,0.0705747356235075,0.359375
+limit_percentile,95.0,70.5,predictive_persist,"Predictive, persistence (ablation)",caused_excess_degree_min,2894.8090541741158,1379.758097792519,10,-390.85631051342926,-864.7534218959092,83.04080086905077,0.10546875
+limit_percentile,95.0,70.5,predictive_persist,"Predictive, persistence (ablation)",rejected,0.0,0.0,10,0.0,,,
+limit_percentile,95.0,70.5,thermalview,ThermalView (ML + heat model),caused_violation_pct,2.0794326241134753,0.9963819665613016,10,-0.349290780141844,-0.6298874771963352,-0.06869408308735286,0.037109375
+limit_percentile,95.0,70.5,thermalview,ThermalView (ML + heat model),caused_excess_degree_min,2550.295615459282,1432.6212958586646,10,-735.3697492282633,-1247.6440334924487,-223.09546496407813,0.01953125
+limit_percentile,95.0,70.5,thermalview,ThermalView (ML + heat model),rejected,0.0,0.0,10,0.0,,,
+limit_percentile,99.0,71.0,coolest_now,Coolest now (reactive),caused_violation_pct,2.277304964539007,0.8441517313184136,10,,,,
+limit_percentile,99.0,71.0,coolest_now,Coolest now (reactive),caused_excess_degree_min,2952.926217851458,1413.1159156328083,10,,,,
+limit_percentile,99.0,71.0,coolest_now,Coolest now (reactive),rejected,0.0,0.0,10,,,,
+limit_percentile,99.0,71.0,predictive_persist,"Predictive, persistence (ablation)",caused_violation_pct,2.152482269503546,0.8102800237185936,10,-0.12482269503546091,-0.33868745500830844,0.08904206493738663,0.275390625
+limit_percentile,99.0,71.0,predictive_persist,"Predictive, persistence (ablation)",caused_excess_degree_min,2581.0501962722237,1265.909763313761,10,-371.8760215792341,-821.5520811510752,77.80003799260703,0.10546875
+limit_percentile,99.0,71.0,predictive_persist,"Predictive, persistence (ablation)",rejected,0.0,0.0,10,0.0,,,
+limit_percentile,99.0,71.0,thermalview,ThermalView (ML + heat model),caused_violation_pct,1.9219858156028369,0.9359194448866146,10,-0.3553191489361701,-0.6197553749576238,-0.09088292291471645,0.037109375
+limit_percentile,99.0,71.0,thermalview,ThermalView (ML + heat model),caused_excess_degree_min,2266.8158195352967,1301.0861859681982,10,-686.1103983161611,-1177.7944161538007,-194.42638047852148,0.01953125
+limit_percentile,99.0,71.0,thermalview,ThermalView (ML + heat model),rejected,0.0,0.0,10,0.0,,,

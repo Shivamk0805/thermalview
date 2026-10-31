@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThermalView</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<!-- ============ sign-in ============ -->
+<section id="login" class="login" hidden>
+  <form id="login-form" class="login-card" novalidate>
+    <div class="brand big">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+      <div><div class="brand-name">ThermalView</div><div class="brand-sub">Heat-aware workload placement</div></div>
+    </div>
+    <label class="field">Username <input id="lg-user" autocomplete="username" required></label>
+    <label class="field">Password <input id="lg-pass" type="password" autocomplete="current-password" required></label>
+    <p id="lg-error" class="form-error" role="alert"></p>
+    <button class="btn primary wide" type="submit">Sign in</button>
+    <p class="hint">Accounts and roles are set in <code>config.toml</code> → <code>[auth]</code>. Viewers can read and export; operators can also act.</p>
+  </form>
+</section>
+
+<!-- ============ console ============ -->
+<div id="app" hidden>
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+    <div><div class="brand-name">ThermalView</div><div id="org" class="brand-sub"></div></div>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#/overview" data-view="overview">Overview</a>
+    <a href="#/servers" data-view="servers">Servers</a>
+    <a href="#/place" data-view="place">Place workload <span id="queue-badge" class="nav-badge warn" hidden></span></a>
+    <a href="#/alerts" data-view="alerts">Alerts <span id="alert-badge" class="nav-badge" hidden></span></a>
+    <a href="#/inventory" data-view="inventory">Inventory</a>
+    <a href="#/audit" data-view="audit">Audit log</a>
+    <a href="#/users" data-view="users">Users</a>
+    <a href="#/results" data-view="results">Results</a>
+    <a href="#/api" data-view="api">API</a>
+  </nav>
+  <div class="clock">
+    <div class="clock-time"><span id="sim-time">--:--</span><span class="clock-label">simulated</span></div>
+    <button id="btn-run" class="btn ghost op-only" type="button">Pause</button>
+    <select id="speed" class="op-only" aria-label="Simulation speed">
+      <option value="1">1 min/s</option><option value="2">2 min/s</option><option value="5">5 min/s</option><option value="10">10 min/s</option>
+    </select>
+    <div class="user">
+      <span id="user-name"></span><span id="user-role" class="role"></span>
+      <button id="btn-logout" class="btn ghost small" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div id="dev-banner" class="banner" hidden>Development data: the fleet runs on synthetic telemetry. Nothing on these screens is a research result.</div>
+<div id="viewer-banner" class="banner info" hidden>You are signed in as a viewer: you can look and export, but placing work, maintenance and fault controls need an operator.</div>
+<div id="error-banner" class="banner error" hidden></div>
+
+<main>
+  <!-- Overview -->
+  <section id="view-overview" class="view" aria-labelledby="ov-h">
+    <div class="view-head">
+      <h1 id="ov-h">Fleet overview</h1>
+      <p id="ov-lede" class="lede"></p>
+    </div>
+    <div id="kpis" class="kpis"></div>
+    <div class="ov-layout">
+      <div>
+        <div class="heat-legend" aria-hidden="true">
+          <span class="muted">CPU temperature</span>
+          <span id="scale-lo"></span><span class="scale-bar"></span><span id="scale-hi"></span>
+          <span class="lg-item"><i class="g-hot"></i>over limit</span>
+          <span class="lg-item"><i class="g-fc"></i>forecast over limit</span>
+          <span class="lg-item"><i class="g-fault"></i>fan fault</span>
+          <span class="lg-item"><i class="g-maint"></i>drained</span>
+          <span class="lg-item"><i class="g-stale"></i>no telemetry</span>
+          <span class="lg-item"><i class="g-ext"></i>external</span>
+        </div>
+        <div id="sites" class="sites"></div>
+      </div>
+      <aside class="side">
+        <section class="panel">
+          <div class="panel-head"><h2>Active alerts</h2><a href="#/alerts" class="small-link">All alerts</a></div>
+          <ol id="ov-alerts" class="events"></ol>
+        </section>
+        <section class="panel op-panel">
+          <h2>Scenarios</h2>
+          <p class="hint">Simulate a facilities problem and watch ThermalView react. Every change is audited.</p>
+          <label class="field">Hall
+            <select id="sc-hall"></select>
+          </label>
+          <label class="field">Cooling degraded: inlet air rises by <output id="sc-out">0 °C</output>
+            <input id="sc-rise" type="range" min="0" max="12" step="1" value="0">
+          </label>
+          <div class="btn-row">
+            <button id="sc-preview" class="btn ghost" type="button">Preview</button>
+            <button id="sc-apply" class="btn ghost op-only" type="button">Apply to hall</button>
+          </div>
+          <div id="sc-result" class="whatif" hidden></div>
+          <label class="check"><input id="auto-jobs" type="checkbox" class="op-only" checked> Scheduler places background jobs with ThermalView</label>
+          <p class="hint">Fan failure, lost sensor, stuck process, drain and retire are on each server (click a rack slot).</p>
+        </section>
+        <section class="panel">
+          <h2>Resilience</h2>
+          <p class="hint res-q">If one hall lost <select id="res-rise" aria-label="Cooling loss"><option>3</option><option selected>6</option><option>9</option></select> °C of cooling right now:</p>
+          <ol id="resilience" class="res-list"></ol>
+          <p class="hint">Predicted from current forecasts and each server's fitted heat response. Nothing is applied.</p>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Servers -->
+  <section id="view-servers" class="view" aria-labelledby="sv-h" hidden>
+    <div class="view-head row">
+      <div><h1 id="sv-h">Servers</h1><p class="lede">Every active server, sortable. Click a row for its history and actions.</p></div>
+      <a class="btn ghost" href="/api/export/fleet.csv" data-export>Export CSV</a>
+    </div>
+    <div class="filters">
+      <input id="sv-q" type="search" placeholder="Search name or rack" aria-label="Search servers">
+      <select id="sv-site" aria-label="Site"><option value="">All sites</option></select>
+      <select id="sv-state" aria-label="State">
+        <option value="">All states</option><option value="attention">Needs attention</option>
+        <option value="hot">Over limit</option><option value="warning">Forecast over limit</option><option value="watch">Near limit</option>
+        <option value="fault">Fan fault</option><option value="stale">No telemetry</option><option value="maint">Drained</option>
+      </select>
+      <span id="sv-count" class="muted"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="data sortable" id="sv-table">
+        <thead><tr>
+          <th data-k="name">Server</th><th data-k="loc">Location</th><th data-k="temp" class="num">Now °C</th>
+          <th data-k="f5" class="num">+5 min</th><th data-k="f15" class="num">+15 min</th><th data-k="f30" class="num">+30 min</th>
+          <th data-k="load" class="num">Load</th><th data-k="power" class="num">Power</th><th data-k="n_jobs" class="num">Jobs</th>
+          <th data-k="state">State</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Place -->
+  <section id="view-place" class="view" aria-labelledby="place-h" hidden>
+    <div class="view-head">
+      <h1 id="place-h">Place a workload</h1>
+      <p class="lede">Describe the job. ThermalView filters servers that can't take it, predicts each server's temperature <span class="h-label">5</span> minutes after placing it, and ranks them.</p>
+    </div>
+    <section class="panel queue-panel">
+      <div class="panel-head">
+        <h2>Jobs waiting for a decision <span id="q-count" class="muted"></span></h2>
+        <div class="seg" role="radiogroup" aria-label="Placement mode">
+          <button type="button" data-mode="auto" aria-checked="true" role="radio">Automatic</button>
+          <button type="button" data-mode="manual" aria-checked="false" role="radio">Manual approval</button>
+        </div>
+      </div>
+      <p id="q-explain" class="hint"></p>
+      <ol id="q-list" class="q-list"></ol>
+    </section>
+    <div class="place-layout">
+      <form id="wl-form" class="panel form" novalidate>
+        <div class="presets" role="group" aria-label="Examples">
+          <button type="button" class="chip" data-preset="12,8,20,Web request burst">Small</button>
+          <button type="button" class="chip" data-preset="25,32,45,Analytics batch">Medium</button>
+          <button type="button" class="chip" data-preset="40,96,90,Model training">Heavy</button>
+        </div>
+        <label class="field">Name <input id="wl-name" type="text" value="Analytics batch" maxlength="60"></label>
+        <label class="field">CPU needed <span class="unit-wrap"><input id="wl-cpu" type="number" min="1" max="100" step="1" value="25"><span>% of a server</span></span></label>
+        <label class="field">Memory needed <span class="unit-wrap"><input id="wl-mem" type="number" min="1" max="4096" step="1" value="32"><span>GB</span></span></label>
+        <label class="field">Runs for <span class="unit-wrap"><input id="wl-dur" type="number" min="1" max="1440" step="1" value="45"><span>minutes</span></span></label>
+        <label class="field">Site <select id="wl-site"><option value="">Any site</option></select></label>
+        <p id="wl-error" class="form-error" role="alert"></p>
+        <button class="btn primary op-only" type="submit">Rank servers</button>
+        <p class="hint viewer-only">Ranking and placing need the operator role.</p>
+      </form>
+      <div class="ranking">
+        <div id="rank-empty" class="empty">Enter a workload and rank the servers to see where it fits best.</div>
+        <div id="rank-head" class="rank-meta" hidden></div>
+        <ol id="rank-list" class="rank-list"></ol>
+        <details id="rank-excluded" class="excluded" hidden><summary></summary><ul></ul></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <section id="view-alerts" class="view" aria-labelledby="al-h" hidden>
+    <div class="view-head row">
+      <div><h1 id="al-h">Alerts</h1><p class="lede">Opened automatically when a server is over the limit, is forecast to cross it, has a fan fault or stops reporting. An alert closes on its own once the condition has been clear for a few minutes.</p></div>
+      <a class="btn ghost" href="/api/export/alerts.csv" data-export>Export CSV</a>
+    </div>
+    <div class="seg" role="tablist" aria-label="Alert status">
+      <button type="button" data-st="active" aria-selected="true">Active</button>
+      <button type="button" data-st="resolved">Resolved</button>
+      <button type="button" data-st="all">All</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data" id="al-table">
+        <thead><tr><th>Severity</th><th>Server</th><th>What</th><th>Opened</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Inventory -->
+  <section id="view-inventory" class="view" aria-labelledby="inv-h" hidden>
+    <div class="view-head row">
+      <div><h1 id="inv-h">Inventory</h1><p class="lede">Add servers to racks, drain them for maintenance, retire them. Retired servers stay listed for the record.</p></div>
+      <a class="btn ghost" href="/api/export/fleet.csv" data-export>Export CSV</a>
+    </div>
+    <form id="add-form" class="panel add-form op-panel" novalidate>
+      <h2>Add a server</h2>
+      <div class="add-grid">
+        <label class="field">Site <select id="add-site"></select></label>
+        <label class="field">Hall <select id="add-hall"></select></label>
+        <label class="field">Rack <input id="add-rack" list="rack-list" maxlength="8" placeholder="A01"><datalist id="rack-list"></datalist></label>
+        <label class="field">Name <input id="add-name" maxlength="32" placeholder="automatic"></label>
+        <label class="field">Telemetry
+          <select id="add-kind"><option value="simulated">Simulated (copies a real M100 node)</option><option value="external">External (sent by an agent via the API)</option></select>
+        </label>
+        <button class="btn primary op-only" type="submit">Add server</button>
+      </div>
+      <p id="add-error" class="form-error" role="alert"></p>
+    </form>
+    <div class="table-wrap">
+      <table class="data" id="inv-table">
+        <thead><tr><th>Server</th><th>Site</th><th>Hall</th><th>Rack / slot</th><th>Telemetry</th><th>Copies node</th><th>Status</th><th>Added</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Audit -->
+  <section id="view-audit" class="view" aria-labelledby="au-h" hidden>
+    <div class="view-head row">
+      <div><h1 id="au-h">Audit log</h1><p class="lede">Every sign-in, recommendation, placement, maintenance change, fault action, acknowledgement and export, newest first.</p></div>
+      <a class="btn ghost" href="/api/export/audit.csv" data-export>Export CSV</a>
+    </div>
+    <div class="filters">
+      <select id="au-user" aria-label="User"><option value="">All users</option></select>
+      <select id="au-action" aria-label="Action"><option value="">All actions</option></select>
+      <label class="check inline"><input id="au-sched" type="checkbox"> Include automatic scheduler placements</label>
+    </div>
+    <div class="table-wrap">
+      <table class="data" id="au-table">
+        <thead><tr><th>Time (wall)</th><th>Sim time</th><th>User</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Users -->
+  <section id="view-users" class="view" aria-labelledby="us-h" hidden>
+    <div class="view-head">
+      <h1 id="us-h">Users</h1>
+      <p class="lede">Only operators can add or remove accounts and reset passwords. Everyone can change their own password.
+        Passwords are stored as salted hashes, never in plain text, so nobody (including operators) can read them back.</p>
+    </div>
+    <form id="user-form" class="panel add-form op-panel op-only" novalidate>
+      <h2>Add a user</h2>
+      <div class="add-grid">
+        <label class="field">Username <input id="nu-name" maxlength="32" placeholder="e.g. priya" autocomplete="off"></label>
+        <label class="field">Display name <input id="nu-display" maxlength="64" placeholder="e.g. Priya (NOC)"></label>
+        <label class="field">Role
+          <select id="nu-role"><option value="viewer">Viewer (look and export)</option><option value="operator">Operator (can act)</option></select>
+        </label>
+        <label class="field">Password <input id="nu-pass" type="password" minlength="8" autocomplete="new-password" placeholder="at least 8 characters"></label>
+        <button class="btn primary" type="submit">Add user</button>
+      </div>
+      <p id="nu-error" class="form-error" role="alert"></p>
+    </form>
+    <div class="table-wrap op-only">
+      <table class="data" id="us-table">
+        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Defined in</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <form id="mypw-form" class="panel add-form" novalidate>
+      <h2>Change my password</h2>
+      <div class="add-grid">
+        <label class="field">Current password <input id="mp-cur" type="password" autocomplete="current-password"></label>
+        <label class="field">New password <input id="mp-new" type="password" minlength="8" autocomplete="new-password"></label>
+        <button class="btn" type="submit">Change password</button>
+      </div>
+      <p id="mp-error" class="form-error" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- Results -->
+  <section id="view-results" class="view" aria-labelledby="results-h" hidden>
+    <div class="view-head">
+      <h1 id="results-h">Results</h1>
+      <p class="lede">Numbers from the offline experiments in <code>results/</code>. These are what the paper reports.</p>
+    </div>
+    <div id="results-body"></div>
+  </section>
+
+  <!-- API -->
+  <section id="view-api" class="view" aria-labelledby="api-h" hidden>
+    <div class="view-head">
+      <h1 id="api-h">API</h1>
+      <p class="lede">How other systems talk to ThermalView. The same text is in <code>docs/API.md</code>.</p>
+    </div>
+    <div id="api-body" class="prose"></div>
+  </section>
+</main>
+
+<aside id="drawer" class="drawer" aria-hidden="true" aria-labelledby="drawer-title">
+  <div class="drawer-head">
+    <div>
+      <h2 id="drawer-title"></h2>
+      <p id="drawer-sub" class="muted"></p>
+    </div>
+    <button id="drawer-close" class="btn ghost" type="button" aria-label="Close server details">Close</button>
+  </div>
+  <div id="drawer-stats" class="stats"></div>
+  <h3>Temperature, last 3 hours and next 30 minutes</h3>
+  <div id="chart-temp" class="chart"></div>
+  <div class="chart-legend"><span><i style="background:var(--ink)"></i>Measured</span><span><i style="background:var(--warm)"></i>5-min forecast, as issued</span><span><i class="dash"></i>Forecast now</span><span><i style="background:var(--hot)"></i>Limit</span></div>
+  <h3>CPU load</h3>
+  <div id="chart-load" class="chart small"></div>
+  <h3>Maintenance</h3>
+  <div class="drawer-actions">
+    <button id="btn-drain" class="btn ghost op-only" type="button">Drain for maintenance</button>
+    <button id="btn-retire" class="btn ghost op-only" type="button">Retire</button>
+    <a id="btn-tel" class="btn ghost" href="#" data-export>Telemetry CSV</a>
+  </div>
+  <p id="drawer-note" class="hint"></p>
+  <div id="fault-box">
+    <h3>Simulate a failure</h3>
+    <table class="faults">
+      <tr><td><b>Fan failure</b><div class="muted">Less cooling: settles about 12 °C hotter, more slowly.</div></td>
+        <td><button class="btn ghost small" data-wi="fan" type="button">What if?</button></td>
+        <td><button id="btn-fan" class="btn danger small op-only" type="button">Fail fan</button></td></tr>
+      <tr><td><b>Stuck process</b><div class="muted">A process outside any job burns <input id="rw-pct" type="number" min="10" max="100" step="10" value="60" aria-label="CPU percent"> % CPU.</div></td>
+        <td><button class="btn ghost small" data-wi="runaway" type="button">What if?</button></td>
+        <td><button id="btn-runaway" class="btn danger small op-only" type="button">Start it</button></td></tr>
+      <tr><td><b>Lost sensor</b><div class="muted">The server keeps running but stops reporting.</div></td>
+        <td></td>
+        <td><button id="btn-sensor" class="btn danger small op-only" type="button">Cut telemetry</button></td></tr>
+    </table>
+    <div id="drawer-whatif" class="whatif" hidden></div>
+  </div>
+</aside>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

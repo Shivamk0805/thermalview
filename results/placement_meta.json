@@ -1,0 +1,73 @@
+{
+  "fleet_nodes": [
+    "555",
+    "715",
+    "790",
+    "843",
+    "854",
+    "867",
+    "958",
+    "973",
+    "101",
+    "232"
+  ],
+  "arrival_rate_per_min": {
+    "1.25": 0.044593959664515716,
+    "1.5": 0.0891879193290314,
+    "1.75": 0.13378187899354707
+  },
+  "threshold_c": 70.5,
+  "horizon_min": 5,
+  "forecaster": "random_forest",
+  "background_trace_min": 9771,
+  "data_source": "M100",
+  "config": {
+    "simulator": {
+      "n_servers": 10,
+      "background_load_scale": 1.0,
+      "cpu_cap_pct": 90.0,
+      "memory_gb": 256.0,
+      "background_memory_frac": 0.3,
+      "noise_scale": 1.0
+    },
+    "workload": {
+      "arrival_rate_per_min": "auto",
+      "target_utilization": 0.75,
+      "load_factors": [
+        1.25,
+        1.5,
+        1.75
+      ],
+      "cpu_min": 10.0,
+      "cpu_max": 40.0,
+      "mem_min_gb": 4.0,
+      "mem_max_gb": 64.0,
+      "duration_median_min": 30.0,
+      "duration_sigma": 0.6
+    },
+    "evaluation": {
+      "sim_days": 2,
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "fidelity_horizons": [
+        5,
+        15,
+        30
+      ]
+    },
+    "recommender": {
+      "safety_margin_c": 3.0,
+      "stale_after_min": 3
+    }
+  }
+}

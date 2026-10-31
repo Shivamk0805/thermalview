@@ -1,0 +1,5 @@
+{
+  "@odata.id": "/redfish/v1/Chassis/1/Power",
+  "Name": "Power (example document, shape per DMTF Redfish Power schema)",
+  "PowerControl": [{"Name": "System Power", "PowerConsumedWatts": 640}]
+}

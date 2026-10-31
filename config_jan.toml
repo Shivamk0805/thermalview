@@ -1,0 +1,180 @@
+# January 2021: untouched cross-month test month. Used only by
+#   python -m thermalview prepare  --config config_jan.toml
+#   python -m thermalview transfer --test-config config_jan.toml      (frozen February models on January)
+#   python -m thermalview forecast --config config_jan.toml           (optional: same protocol re-run within January)
+# ThermalView configuration. Every experiment reads this file, and the
+# values used are copied into each results file so runs are reproducible.
+
+[paths]
+raw_m100 = "data/raw/m100"          # extracted M100 month(s) live here
+processed = "data/processed_jan"    # cleaned 1-minute table (January: cross-month test)
+artifacts = "artifacts_jan"         # models trained on January (replication only)
+results = "results_jan"             # within-January replication (the paper reads results/)
+database = "data/thermalview.db"    # live app database
+
+[m100]
+# Which M100 metrics to read. Each entry is a regular expression matched
+# against metric names in the dataset (run `python -m thermalview probe`
+# first to see the real names, then adjust these if needed).
+# Several metrics can match one field; `agg` says how they are combined.
+plugin = "ipmi_pub"
+# Which extracted month to use (folder data/raw/m100/year_month=<this>). Several
+# months can be extracted side by side. 21-03 was the development month (its
+# results are kept in results_archive/); 21-02 is the evaluation month.
+year_month = "21-01"
+max_days = 21                 # cap the window so a full month stays laptop-sized
+cpu_temp = { pattern = "^p[0-9]+_core[0-9]+_temp$", agg = "max" }
+inlet    = { pattern = "^ambient$", agg = "mean" }
+power    = { pattern = "^total_power$", agg = "mean" }
+fan      = { pattern = "^fan[0-9]+_[0-9]+$", agg = "mean" }
+# CPU load. Best guess: the Ganglia plugin's idle percentage, turned into
+# utilisation as 100 - idle. Confirm with `probe`; if no utilisation metric
+# exists, set load_transform = "power_proxy" and point the pattern at CPU
+# package power (it is then rescaled to 0-100 per node).
+load_plugin = "ganglia_pub"
+load     = { pattern = "^cpu_idle$", agg = "mean" }
+load_transform = "100_minus"   # one of: "none", "100_minus", "power_proxy"
+
+[prepare]
+resample_minutes = 1
+max_gap_fill_minutes = 2      # gaps up to this long are interpolated
+min_coverage = 0.80           # node must have >=80% valid minutes in the window
+n_nodes = 60                  # the evaluation month's 40 nodes (where eligible) + new ones at random
+include_nodes_from = "data/processed"   # keep these nodes so the frozen model meets nodes it trained on
+seed = 7
+
+[forecast]
+horizons = [5, 15, 30]        # minutes ahead; 5 is used by the app
+features = "auto"             # "auto" picks per horizon on validation among feature_candidates; or "relative" / "extended" / "all"
+feature_candidates = ["relative", "extended"]   # extended = relative + 30/60-min history and load shape
+interval_coverage = 0.9       # split-conformal interval for each forecast (calibrated on validation)
+primary_horizon = 5
+train_frac = 0.6              # chronological: first 60% of time
+val_frac = 0.2                # next 20% for hyper-parameter selection
+holdout_node_frac = 0.2       # 20% of nodes never seen in training
+max_train_rows = 250000       # same subsample for every model (keeps RF training time sane)
+event_rise_c = 2.0            # "heating event": temp rises >= this over horizon
+bootstrap_iters = 1000
+seed = 7
+# Thermal threshold. "auto" = 95th percentile of training temperatures,
+# rounded to 0.5 C. Replace with a number to fix it.
+threshold_c = "auto"
+
+[thermal_model]
+min_alpha = 0.005
+max_alpha = 0.8
+
+[simulator]
+n_servers = 10
+background_load_scale = 1.0   # recorded load replayed as is (scaling it would decouple it from the replayed temperature)
+cpu_cap_pct = 90.0            # placement must keep load <= this
+memory_gb = 256.0
+background_memory_frac = 0.30
+noise_scale = 1.0             # multiplies each node's fitted residual noise
+
+[workload]
+arrival_rate_per_min = "auto"   # or a number; "auto" targets the utilisation below
+target_utilization = 0.75     # used by the live app
+# Placement experiment: mean simulated load as a multiple of the fleet's recorded
+# mean load (fixed in advance, all reported); jobs supply the extra. Kept modest so
+# the response model stays inside the load range it was fitted on.
+load_factors = [1.25, 1.5, 1.75]
+cpu_min = 10.0
+cpu_max = 40.0
+mem_min_gb = 4.0
+mem_max_gb = 64.0
+duration_median_min = 30.0
+duration_sigma = 0.6
+
+[evaluation]
+sim_days = 2
+seeds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Simulator-fidelity check horizons (match the forecast horizons)
+fidelity_horizons = [5, 15, 30]
+
+[sensitivity]                 # python -m thermalview sensitivity (one setting changed at a time)
+load_factor = 1.5
+limit_percentiles = [85, 90, 95, 99]  # thermal limit = this percentile of training temperatures
+# The safety margin is not varied: it changes the status labels, never the order of servers
+# (a server with a larger margin always has a lower predicted temperature).
+safety_margins_c = []
+policies = ["coolest_now", "predictive_persist", "thermalview"]
+
+[recommender]
+safety_margin_c = 3.0         # below threshold by less than this = "caution"
+stale_after_min = 3
+
+[app]
+host = "127.0.0.1"
+port = 8000
+tick_seconds = 1.0
+sim_minutes_per_tick = 1
+history_minutes = 720
+session_hours = 10
+
+# ---- Live console: the fleet an operator manages -------------------------
+# Every simulated server copies one real M100 node's fitted heat model and
+# replays that node's recorded load (starting at a different point, so two
+# servers that copy the same node do not behave identically).
+[fleet]
+org_name = "Example Telecom (fictional operator)"
+cpu_cap_pct = 90.0
+memory_gb = 256.0
+background_load_scale = 1.0
+background_memory_frac = 0.30
+noise_scale = 1.0
+background_jobs_per_server_per_min = 0.012
+placement_mode = "auto"       # auto: scheduler places on ThermalView's pick; manual: every job waits for an operator
+queue_expire_min = 15         # a held job nobody decides on is dropped (and logged) after this long
+
+[[fleet.sites]]
+code = "PNQ1"
+name = "Pune DC 1"
+inlet_bias_c = 0.0
+halls = [ { name = "A", racks = 2, servers_per_rack = 6 },
+          { name = "B", racks = 2, servers_per_rack = 6 } ]
+
+[[fleet.sites]]
+code = "HYD2"
+name = "Hyderabad DC 2"
+inlet_bias_c = 1.0
+halls = [ { name = "A", racks = 2, servers_per_rack = 8 } ]
+
+[[fleet.sites]]
+code = "MAA1"
+name = "Chennai DC 1"
+inlet_bias_c = 2.0
+halls = [ { name = "A", racks = 1, servers_per_rack = 10 } ]
+
+# ---- Alerts ---------------------------------------------------------------
+[alerts]
+open_after_min = 2            # over / forecast-over must hold this long before an alert opens (no flicker)
+resolve_after_min = 5         # condition clear this long -> alert closes
+escalate_after_min = 10       # critical and not acknowledged this long -> escalated
+incident_min_servers = 3      # at least this many hot servers in one hall ...
+incident_min_fraction = 0.25  # ... and at least this share of the hall -> one hall incident (likely cooling)
+limit_c = "model"             # thermal limit for alerts and ranking: "model" = the research threshold
+                              # (95th pct of training temps), or a number set by the operator
+webhook_url = ""              # e.g. a Slack/Teams incoming webhook; empty = off
+webhook_events = ["open", "escalate", "resolve"]
+
+# ---- Operator accounts ---------------------------------------------------
+# Demo accounts. Change the passwords before showing this to anyone else.
+# Roles: viewer (read, export) and operator (also place, drain, inventory,
+# faults, acknowledge alerts).
+[[auth.users]]
+username = "operator"
+password = "operator-demo"
+role = "operator"
+name = "Shift operator"
+
+[[auth.users]]
+username = "viewer"
+password = "viewer-demo"
+role = "viewer"
+name = "NOC viewer"
+
+# ---- Telemetry ingest API (where monitoring agents plug in) -------------
+[api]
+ingest_tokens = ["tv-demo-agent-token"]

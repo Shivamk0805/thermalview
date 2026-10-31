@@ -1,0 +1,14 @@
+{
+  "@odata.id": "/redfish/v1/Chassis/1/Thermal",
+  "Name": "Thermal (example document, shape per DMTF Redfish Thermal schema)",
+  "Temperatures": [
+    {"Name": "Inlet Ambient", "PhysicalContext": "Intake", "ReadingCelsius": 23.0},
+    {"Name": "CPU 1", "PhysicalContext": "CPU", "ReadingCelsius": 61.0},
+    {"Name": "CPU 2", "PhysicalContext": "CPU", "ReadingCelsius": 63.5},
+    {"Name": "DIMM 1", "PhysicalContext": "Memory", "ReadingCelsius": 41.0}
+  ],
+  "Fans": [
+    {"Name": "Fan 1", "Reading": 7100, "ReadingUnits": "RPM"},
+    {"Name": "Fan 2", "Reading": 7300, "ReadingUnits": "RPM"}
+  ]
+}

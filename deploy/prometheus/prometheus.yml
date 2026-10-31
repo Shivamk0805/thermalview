@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: thermalview
+    metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials: tv-demo-agent-token     # must match [api].ingest_tokens in config.toml
+    static_configs:
+      - targets: ["thermalview:8000"]

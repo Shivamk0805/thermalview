@@ -1,0 +1,7 @@
+.venv
+data/raw
+results_archive
+**/__pycache__
+*.pyc
+.pytest_cache
+data/users.json

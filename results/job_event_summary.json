@@ -1,0 +1,16 @@
+{
+  "n_jobs": 90331,
+  "n_listed_nodes": 965,
+  "n_matched_nodes": 40,
+  "n_starts": 2813,
+  "n_out_of_sample_starts": 0,
+  "out_of_sample_from": "2021-02-15 05:28:12+00:00",
+  "job_start_min": "2021-01-31 03:20:02+00:00",
+  "job_start_max": "2021-02-10 18:40:00+00:00",
+  "telemetry_start": "2021-02-01 00:20:00+00:00",
+  "telemetry_end": "2021-02-22 00:19:00+00:00",
+  "mean_load_step_2min": 6.128512152821648,
+  "mean_temp_rise_15min": 8.353941651148354,
+  "temp_minus15_vs_minus1": 5.660328113348248,
+  "ids_look_valid": true
+}

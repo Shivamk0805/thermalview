@@ -1,0 +1,40 @@
+# ThermalView console + Prometheus + Grafana.
+#   docker compose up --build
+# Console http://localhost:8000 · Prometheus http://localhost:9090 · Grafana http://localhost:3000 (admin / admin)
+# Run `python -m thermalview all` on the host first: the console reads artifacts/, results/ and data/processed/.
+services:
+  thermalview:
+    build: .
+    ports: ["8000:8000"]
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./artifacts:/app/artifacts:ro
+      - ./results:/app/results:ro
+      - ./data/processed:/app/data/processed:ro
+      - thermalview-db:/app/data/db
+    environment:
+      - THERMALVIEW_DB=/app/data/db/thermalview.db
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    ports: ["9090:9090"]
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on: [thermalview]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports: ["3000:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+    restart: unless-stopped
+
+volumes:
+  thermalview-db:

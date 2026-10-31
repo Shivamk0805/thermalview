@@ -1,0 +1,230 @@
+{
+  "data_source": "M100",
+  "dataset": {
+    "nodes": 40,
+    "rows": 1209600,
+    "valid_rows": 987372,
+    "start": "2021-02-01 00:20:00+00:00",
+    "end": "2021-02-22 00:19:00+00:00",
+    "days": 21.0,
+    "cpu_temp_c": {
+      "mean": 57.03,
+      "std": 9.19,
+      "min": 23.67,
+      "25%": 50.33,
+      "50%": 56.67,
+      "75%": 65.33,
+      "max": 77.33
+    },
+    "load_pct": {
+      "mean": 14.09,
+      "std": 20.81,
+      "min": 0.0,
+      "25%": 3.1,
+      "50%": 3.2,
+      "75%": 15.7,
+      "max": 100.0
+    },
+    "optional_columns_used": [
+      "power_w",
+      "inlet_c",
+      "fan_rpm"
+    ]
+  },
+  "threshold_c": 70.5,
+  "feature_columns": [
+    "temp_d1",
+    "temp_d5",
+    "temp_d15",
+    "temp_std15",
+    "load",
+    "load_d1",
+    "load_d5",
+    "load_mean15",
+    "power_d5",
+    "inlet_d15",
+    "fan_d5",
+    "temp_d30",
+    "temp_d60",
+    "temp_std30",
+    "temp_std60",
+    "temp_dev60",
+    "load_d30",
+    "load_d60",
+    "load_mean30",
+    "load_mean60",
+    "load_max15",
+    "load_min15",
+    "min_since_load_step"
+  ],
+  "feature_columns_by_h": {
+    "5": [
+      "temp_d1",
+      "temp_d5",
+      "temp_d15",
+      "temp_std15",
+      "load",
+      "load_d1",
+      "load_d5",
+      "load_mean15",
+      "power_d5",
+      "inlet_d15",
+      "fan_d5",
+      "temp_d30",
+      "temp_d60",
+      "temp_std30",
+      "temp_std60",
+      "temp_dev60",
+      "load_d30",
+      "load_d60",
+      "load_mean30",
+      "load_mean60",
+      "load_max15",
+      "load_min15",
+      "min_since_load_step"
+    ],
+    "15": [
+      "temp_d1",
+      "temp_d5",
+      "temp_d15",
+      "temp_std15",
+      "load",
+      "load_d1",
+      "load_d5",
+      "load_mean15",
+      "power_d5",
+      "inlet_d15",
+      "fan_d5",
+      "temp_d30",
+      "temp_d60",
+      "temp_std30",
+      "temp_std60",
+      "temp_dev60",
+      "load_d30",
+      "load_d60",
+      "load_mean30",
+      "load_mean60",
+      "load_max15",
+      "load_min15",
+      "min_since_load_step"
+    ],
+    "30": [
+      "temp_d1",
+      "temp_d5",
+      "temp_d15",
+      "temp_std15",
+      "load",
+      "load_d1",
+      "load_d5",
+      "load_mean15",
+      "power_d5",
+      "inlet_d15",
+      "fan_d5",
+      "temp_d30",
+      "temp_d60",
+      "temp_std30",
+      "temp_std60",
+      "temp_dev60",
+      "load_d30",
+      "load_d60",
+      "load_mean30",
+      "load_mean60",
+      "load_max15",
+      "load_min15",
+      "min_since_load_step"
+    ]
+  },
+  "feature_sets_compared": [
+    "relative",
+    "extended"
+  ],
+  "interval_q": {
+    "5": 2.8305557414108304,
+    "15": 3.9089932438444297,
+    "30": 5.138856416142865
+  },
+  "interval_coverage": 0.9,
+  "splits": {
+    "5": {
+      "train": 457497,
+      "val": 154020,
+      "test_seen": 152310,
+      "test_unseen": 38239,
+      "t_train_end": "2021-02-11 19:58:24+00:00",
+      "t_val_end": "2021-02-15 05:28:12+00:00",
+      "holdout_nodes": [
+        "555",
+        "715",
+        "790",
+        "843",
+        "854",
+        "867",
+        "958",
+        "973"
+      ]
+    },
+    "15": {
+      "train": 456891,
+      "val": 153700,
+      "test_seen": 152310,
+      "test_unseen": 38239,
+      "t_train_end": "2021-02-11 19:58:24+00:00",
+      "t_val_end": "2021-02-15 05:28:12+00:00",
+      "holdout_nodes": [
+        "555",
+        "715",
+        "790",
+        "843",
+        "854",
+        "867",
+        "958",
+        "973"
+      ]
+    },
+    "30": {
+      "train": 456371,
+      "val": 153220,
+      "test_seen": 152310,
+      "test_unseen": 38239,
+      "t_train_end": "2021-02-11 19:58:24+00:00",
+      "t_val_end": "2021-02-15 05:28:12+00:00",
+      "holdout_nodes": [
+        "555",
+        "715",
+        "790",
+        "843",
+        "854",
+        "867",
+        "958",
+        "973"
+      ]
+    }
+  },
+  "chosen_model_by_horizon": {
+    "5": "random_forest",
+    "15": "random_forest",
+    "30": "ridge"
+  },
+  "config": {
+    "horizons": [
+      5,
+      15,
+      30
+    ],
+    "features": "auto",
+    "feature_candidates": [
+      "relative",
+      "extended"
+    ],
+    "interval_coverage": 0.9,
+    "primary_horizon": 5,
+    "train_frac": 0.6,
+    "val_frac": 0.2,
+    "holdout_node_frac": 0.2,
+    "max_train_rows": 250000,
+    "event_rise_c": 2.0,
+    "bootstrap_iters": 1000,
+    "seed": 7,
+    "threshold_c": "auto"
+  }
+}
